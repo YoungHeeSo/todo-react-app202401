@@ -10,9 +10,7 @@ const TodoTemplate = () =>{
     return(
         <div className='TodoTemplate'>
             <TodoHeader />
-
             <TodoMain />
-
             <TodoInput />
         </div>
     );
