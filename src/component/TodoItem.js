@@ -7,8 +7,6 @@ const TodoItem = ({item, onRemove, onCheck}) => {
 
     const {id, title, done} = item;
 
-    // console.log(props);
-
     const removeHandler = e =>{
         onRemove(id);
     }
