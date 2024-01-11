@@ -72,12 +72,18 @@ const TodoTemplate = () =>{
         console.log(todoList);
     }
 
-    
+    // 할 일 삭제 처리 함수
+    const removeTodo = id =>{
+        console.log('id', id);
+
+        setTodoList(todoList.filter(todo => todo.id !== id)); // todoList에서 id가 다른 애들만 남겨나봐~
+    //     filter나 map은 복사된 배열을 가지고 온다! => 굉장ㅇ히 유용
+    }
 
     return(
         <div className='TodoTemplate'>
             <TodoHeader />
-            <TodoMain todoList={todoList}/>
+            <TodoMain todoList={todoList} onRemove={removeTodo}/>
             <TodoInput onAdd={addTodo}/> {/* 함수 형태로 보내지 말것 ex) addTodo() */}
         </div>
     );
