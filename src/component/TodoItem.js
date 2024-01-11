@@ -1,8 +1,8 @@
 import React from 'react';
 import {MdDelete, MdDone} from "react-icons/md";
 import './scss/TodoItem.scss';
+import cn from 'classnames';
 
-// const TodoItem = ({ item }) => {
 const TodoItem = ({item}) => {
 
     const {title, done} = item;
@@ -11,10 +11,10 @@ const TodoItem = ({item}) => {
 
     return (
         <li className='todo-list-item'>
-            <div className='check-circle'>
+            <div className={cn('check-circle', {active:done})}>
                 {done && <MdDone/>}
             </div>
-            <span className='text'>{title}</span>
+            <span className={cn('text', {finish:done})}>{title}</span>
             <div className='remove'>
                 <MdDelete />
             </div>
