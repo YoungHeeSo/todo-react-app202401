@@ -4,8 +4,9 @@ import './scss/TodoInput.scss';
 import cn from 'classnames'; // class add/remove 도와주는 라이브러리
 
 const TodoInput = () => {
-    // useState - 렌더링 상태를 관리하는 변수지정 리액트 훅
+    // useState - 렌더링 상태를 관리 하는 변수 지정 리액트 훅
     const [open, setOpen] = useState(false);
+
 
     // 버튼 클릭 이벤트
     const onToggle = e =>{

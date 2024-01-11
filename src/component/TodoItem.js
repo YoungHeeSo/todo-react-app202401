@@ -2,7 +2,8 @@ import React from 'react';
 import {MdDelete, MdDone} from "react-icons/md";
 import './scss/TodoItem.scss';
 
-const TodoItem = ({ item }) => {
+// const TodoItem = ({ item }) => {
+const TodoItem = ({item}) => {
 
     const {title, done} = item;
 
