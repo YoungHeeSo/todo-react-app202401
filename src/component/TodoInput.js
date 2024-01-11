@@ -23,10 +23,10 @@ const TodoInput = ({ onAdd }) => {
 
     const submitHandler = e => {
         onAdd(todoText); // 부모에게 주고 싶은 데이터 담기
-        e.preventDefault();
+        e.preventDefault(); // 리액트는 비동기식 이므로 페이지가 새로고침되는 것을 막아주는게 좋을 듯하다
 
         // 폼이 제출되면 입력창 비우기
-        setTodoText('');
+        setTodoText(''); // 값 지정뿐 아니라 렌더링까지 해주어야 input을 빈 값으로 만들어준다!!
     }
 
     return (
@@ -36,15 +36,15 @@ const TodoInput = ({ onAdd }) => {
                     <input
                         type='text'
                         placeholder='할 일을 입력 후, 엔터를 누르세요!'
-                        onChange={todoChangeHandler} // input 의 경우 change 이벤트가 더 좋다
+                        onChange={todoChangeHandler} // input 의 경우 change이벤트가 더 좋다리
+                        value={todoText}
                     />
                 </form>
             </div>)}
 
             {/*
-                cn() : 첫번째 파라미터는 항상 유지할 클래스
-                    두번째 파라미터는 논리 상태값
-                    => 논리상태값이 true일경우 해당클래스가 추가
+                cn() : 첫번째 파라미터는 항상 유지할 클래스, 두번째 파라미터는 논리 상태값
+                    => 논리상태값이 true 일경우 해당클래스가 추가
                        false일 경우 제거
             */}
             <button className={cn('insert-btn', {open})} onClick={onToggle}>
