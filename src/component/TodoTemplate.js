@@ -80,10 +80,31 @@ const TodoTemplate = () =>{
     //     filter나 map은 복사된 배열을 가지고 온다! => 굉장ㅇ히 유용
     }
 
+    // 할 일 체크 처리 함수
+    const checkTodo = id =>{
+        // console.log('check id', id);
+
+        const copyTodoList = [...todoList];
+
+        const foundTodo = copyTodoList.find(todo=> todo.id === id);
+        foundTodo.done = !foundTodo.done;
+
+        console.log(foundTodo);
+
+        setTodoList(copyTodoList);
+
+        // setTodoList(todoList.map(todo => todo.id === id ? {...todo, done: !todo.done} : todo))
+    }
+
+    // check가 안된 할 일 개수 count
+    const countRestTodo = todoList.filter(todo => !todo.done).length;
+
+
+
     return(
         <div className='TodoTemplate'>
-            <TodoHeader />
-            <TodoMain todoList={todoList} onRemove={removeTodo}/>
+            <TodoHeader count={countRestTodo}/>
+            <TodoMain todoList={todoList} onRemove={removeTodo} onCheck={checkTodo}/>
             <TodoInput onAdd={addTodo}/> {/* 함수 형태로 보내지 말것 ex) addTodo() */}
         </div>
     );
