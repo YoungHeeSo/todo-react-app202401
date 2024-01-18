@@ -13,7 +13,7 @@ const TodoItem = ({item, onRemove, onCheck}) => {
 
     const checkHandler = e =>{
         // console.log('check!!');
-        onCheck(id);
+        onCheck(id, done);
     }
 
     return (

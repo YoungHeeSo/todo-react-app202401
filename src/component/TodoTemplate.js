@@ -1,57 +1,37 @@
-
-import React, {useState} from "react";
-
+import React, {useEffect, useState} from "react";
 import './scss/TodoTemplate.scss';
 import TodoHeader from "./TodoHeader";
 import TodoInput from "./TodoInput";
 import TodoMain from "./TodoMain";
 
-const TodoTemplate = () =>{
+
+const TodoTemplate = () => {
+
+    // 서버에서 할 일 목록 (JSON)을 요청해서 받아와야 함
+    const API_BASE_URL = 'http://localhost:8484/api/todos';
 
     /*
-        리액트는 부모 컴포넌트에서 자식 컴포넌트로의 데이터 이동이 반대보다 쉽기 때문에(부모->자식 이 데이터 이동이 쉽다)
-        할 일 데이터는 상위 부모 컴포넌트에서 처리하는 것이 좋다
+        리액트는 부모컴포넌트에서 자식컴포넌트로의 데이터이동이 반대보다 쉽기 때문에
+        할 일 데이터는 상위부모컴포넌트에서 처리하는것이 좋다
      */
+    const [todoList, setTodoList] = useState([]);
 
-
-    // 리액트는 상태변수여야만 값이 바뀌는걸 알 수 있다 그러므로 상태변수로 값을 관리해주어야 한다!!
-    const [todoList, setTodoList] = useState([
-        {
-            id: 1,
-            title: '장보기',
-            done: false
-        },
-        {
-            id: 2,
-            title: '점심먹기',
-            done: true
-        },
-        {
-            id: 3,
-            title: '간식먹기',
-            done: true
-        },
-    ]);
-
-    // 부모가 자식에서 데이터를 주는 것: 상향식 전달
-    // 데이터 상향식 전달을 위해 부모가 자식에서 함수를 하나 전달
+    // 데이터 상향식 전달을 위해 부모가 자식에게 함수를 하나 전달
     const addTodo = (todoText) => {
-        // console.log('할 일 등록 함수를 todoTemplate 에서 실행!!')
+        // console.log('할 일 등록 함수를 todotemplate에서 실행!');
         console.log('todoText: ', todoText);
 
-        const makeNewId = () =>{
-            if(todoList.length === 0 ) return 1;
-            return todoList[todoList.length-1].id+1;
-            // return todoList.length === 0 ? 1 : todoList[todoList.length - 1].id + 1;
-        }
+        const makeNewId = () => {
+            if (todoList.length === 0) return 1;
+            return todoList[todoList.length - 1].id + 1;
+        };
 
         const newTodo = {
-            id: makeNewId(),
-            title: todoText,
-            done: false
+            title: todoText
         };
 
         // todoList.push(newTodo);
+
         /*
             상태변수의 변경은 오로지 setter를 통해서만 가능
             상태값이 변경감지가 되면 리액트는 렌더링을 다시 시작합니다.
@@ -60,52 +40,89 @@ const TodoTemplate = () =>{
             새로운 상태를 만들어서 바꿔야 합니다.
          */
 
-        /*
-        const copyTodoList = todoList.slice();
-        copyTodoList.push(newTodo);
-        setTodoList(copyTodoList);
-        */
+        fetch(API_BASE_URL, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(newTodo)
+        })
+            .then(res => res.json())
+            .then(json => {
+                setTodoList(json.todos);
+            });
 
-        setTodoList(prevState => [...prevState, newTodo]);
+    };
 
-        const copyTodoList = [...todoList, newTodo];
-        console.log(copyTodoList);
-    }
 
     // 할 일 삭제 처리 함수
-    const removeTodo = id =>{
-        console.log('id', id);
+    const removeTodo = id => {
+        // console.log('id:', id);
+        // setTodoList(todoList.filter(todo => todo.id !== id));
 
-        setTodoList(todoList.filter(todo => todo.id !== id)); // todoList 에서 id가 다른 애들만 남겨놔
-        // filter 나 map 은 복사된 배열 값을 반환 한다
-    }
+        fetch(`${API_BASE_URL}/${id}`, {
+            method: 'DELETE'
+        })
+            .then(res => res.json())
+            .then(json => {
+                setTodoList(json.todos);
+            });
+
+    };
 
     // 할 일 체크 처리 함수
-    const checkTodo = id => {
-        // console.log('check id', id);
+    const checkTodo = (id, done) => {
+        // console.log('check id: ', id);
 
-        const copyTodoList = [...todoList];
+        // const copyTodoList = [...todoList];
+        //
+        // const foundTodo = copyTodoList.find(todo => todo.id === id);
+        // foundTodo.done = !foundTodo.done;
+        //
+        // setTodoList(copyTodoList);
 
-        const foundTodo = copyTodoList.find(todo=> todo.id === id);
-        foundTodo.done = !foundTodo.done;
+        // setTodoList(todoList.map(todo => todo.id === id ? {...todo, done: !todo.done} : todo));
 
-        console.log(foundTodo);
-        setTodoList(copyTodoList);
 
-        // setTodoList(todoList.map(todo => todo.id === id ? {...todo, done: !todo.done} : todo))
-    }
+        fetch(API_BASE_URL, {
+            method: 'PUT',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: id,
+                done: !done
+            })
+        }).then(res => res.json())
+            .then(json => {
+                setTodoList(json.todos);
+            });
 
-    // check 가 되지 않은 할 일 개수 count
+    };
+
+
+    // 체크가 안된 할일 개수 카운트하기
     const countRestTodo = todoList.filter(todo => !todo.done).length;
 
 
+    // 렌더링 직전에 해야할 코드를 적는 함수
+    useEffect(() => {
 
-    return(
+        fetch(API_BASE_URL)
+            .then(res => res.json())
+            .then(json => {
+                // console.log(json);
+                setTodoList(json.todos);
+            });
+
+    }, []);
+
+
+    return (
         <div className='TodoTemplate'>
             <TodoHeader count={countRestTodo}/>
             <TodoMain todoList={todoList} onRemove={removeTodo} onCheck={checkTodo}/>
             <TodoInput onAdd={addTodo}/>
-            {/* 함수 형태로 보내지 말 것 ex) addTodo() */}
         </div>
     );
 };
