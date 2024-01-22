@@ -2,7 +2,13 @@ import React, {useState} from 'react';
 import {Button, Container, Grid,
     TextField, Typography, Link} from "@mui/material";
 
+import {AUTH_URL} from "../../config/host-config";
+import {json} from "react-router-dom";
+
 const Join = () => {
+
+    // 서버에서 할 일 목록 (JSON)을 요청해서 받아와야 함
+    const API_BASE_URL = AUTH_URL;
 
     // 상태변수로 회원가입 입력값 관리
     const [userValue, setUserValue] = useState({
@@ -64,22 +70,87 @@ const Join = () => {
         }); // 기존의 값들은 복사하고 어떤 값만 바꿔, js_es6_객체 디스쳐링
     }
 
+    // 이메일 중복체크 비동기통신 (AJAX)
+    const fetchDuplicatedCheck = email => {
+
+        let msg='', flag=false;
+
+        fetch(API_BASE_URL + "/check?email=" + email)
+            .then(res => res.json())
+            .then(json =>{
+                console.log(json);
+
+                if (json) {
+                    msg = '이메일이 중복되었습니다!';
+                    flag = false;
+                } else {
+                    msg = '사용 가능한 이메일입니다.';
+                    flag = true;
+                }
+
+                setUserValue({...userValue, email: email });
+                setMassage({...massage, email: msg });
+
+                setCorrect({...correct, email: flag });
+            });
+
+    }
+
     // 이메일 입력값을 검증하고 관리할 함수
     const emailHandler = e => {
 
+
         const inputVal = e.target.value;
+
+        const emailRegex = /^[a-z0-9\.\-_]+@([a-z0-9\-]+\.)+[a-z]{2,6}$/;
+
+        let msg, flag;
+        if (!inputVal) {
+            msg = '이메일은 필수값입니다!';
+            flag = false;
+        } else if (!emailRegex.test(inputVal)) {
+            msg = '이메일 형식이 아닙니다!';
+            flag = false;
+        } else {
+            // 이메일 중복체크
+            fetchDuplicatedCheck(inputVal);
+            return;
+        }
+
         setUserValue({
             ...userValue,
             email: inputVal
         });
+
+        setCorrect({
+            ...correct,
+            email: flag
+        })
+
+        setMassage({
+            ...massage,
+            email: msg
+        })
     }
 
     // 패스워드 입력값을 검증하고 관리할 함수
     const passwordHandler = e => {
-        const pwRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,20}$/;
+
+        // 패스워드를 입력하면 확인란을 비우기
+        document.getElementById('password-check').value='';
+        document.getElementById('check-text').textContent='';
+        setMassage({
+            ...massage,
+            passwordCheck: '',
+        });
+        setCorrect({
+            ...correct,
+            passwordCheck: false,
+        });
 
         const inputVal = e.target.value;
 
+        const pwRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,20}$/;
         // 검증 시작
         let msg, flag;
         if (!inputVal) { // 패스워드 안적은거
@@ -108,6 +179,34 @@ const Join = () => {
             password: msg
         })
 
+    }
+
+    // 패스워드 확인란을 검증할 함수
+    const pwCheckHandler = e => {
+
+        const inputValue = e.target.value;
+
+        let msg, flag;
+        if (!inputValue) { // 패스워드 안적은거
+            msg = '비밀번호 확인란은 필수값입니다!';
+            flag = false;
+        } else if (userValue.password !== inputValue) {
+            msg = '패스워드가 일치하지 않습니다.';
+            flag = false;
+        } else {
+            msg = '패스워드가 일치합니다.';
+            flag = true;
+        }
+
+        setCorrect({
+            ...correct,
+            passwordCheck: flag
+        })
+
+        setMassage({
+            ...massage,
+            passwordCheck: msg
+        })
 
     }
 
@@ -192,7 +291,7 @@ const Join = () => {
                             type="password"
                             id="password-check"
                             autoComplete="check-password"
-
+                            onChange={pwCheckHandler}
                         />
                         <span id="check-text" style={
                             correct.passwordCheck
