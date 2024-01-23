@@ -1,11 +1,13 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Container, Grid,
     TextField, Typography, Link} from "@mui/material";
 
 import {AUTH_URL} from "../../config/host-config";
-import {json} from "react-router-dom";
+import {json, useNavigate} from "react-router-dom";
 
 const Join = () => {
+
+    const redirection = useNavigate(); // 리다이렉트 함수를 리턴
 
     // 서버에서 할 일 목록 (JSON)을 요청해서 받아와야 함
     const API_BASE_URL = AUTH_URL;
@@ -33,6 +35,32 @@ const Join = () => {
         email: false,
     })
 
+    // 검증이 모두 통과되면 계정 생성 버튼을 열어주는 논리 상태변수
+    const [lock, setLock] = useState(true); // 처음에는 락이 걸려있따
+    // 락이 풀리면 false으로 바꿀거얌
+
+
+
+    // 검증데이터를 상태변수 여러 개에 저장하는 함수
+    const saveInputState = (flag, msg, inputVal, key) => {
+
+        setMassage({
+            ...massage,
+            [key]: msg
+        })
+
+        setCorrect({
+            ...correct,
+            [key]: flag
+        })
+
+        setUserValue({
+            ...userValue,
+            [key]: inputVal
+        });
+
+    } // 기존의 값들은 복사하고 어떤 값만 바꿔, js_es6_객체 디스쳐링
+
 
     // 이름 입력값을 검증하고 관리할 함수
     const nameHandler = e => {
@@ -47,58 +75,40 @@ const Join = () => {
             msg = '유저 이름은 필수 값입니다';
             flag = false;
         } else if(!nameRegex.test(inputVal)){ // 정규표현식에 맞지 않다면
-            msg = '2~5r글자 사이의 한글로 작성해주세요!';
+            msg = '2~5글자 사이의 한글로 작성해주세요!';
             flag = false;
         } else {
             msg = '사용 가능한 이름 입니다';
             flag = true;
         }
 
-        setMassage({
-            ...massage,
-            userName: msg
-        })
-
-        setCorrect({
-            ...correct,
-            userName: flag
-        })
-
-        setUserValue({
-            ...userValue,
-            userName: inputVal
-        }); // 기존의 값들은 복사하고 어떤 값만 바꿔, js_es6_객체 디스쳐링
+        saveInputState(flag, msg, inputVal, 'userName')
     }
 
     // 이메일 중복체크 비동기통신 (AJAX)
-    const fetchDuplicatedCheck = email => {
+    const fetchDuplicatedCheck = async (email) => {
 
         let msg='', flag=false;
 
-        fetch(API_BASE_URL + "/check?email=" + email)
-            .then(res => res.json())
-            .then(json =>{
-                console.log(json);
+        const res = await fetch(API_BASE_URL + "/check?email=" + email)
+        const json = await res.json();
 
-                if (json) {
-                    msg = '이메일이 중복되었습니다!';
-                    flag = false;
-                } else {
-                    msg = '사용 가능한 이메일입니다.';
-                    flag = true;
-                }
+        if (json) {
+            msg = '이메일이 중복되었습니다!';
+            flag = false;
+        } else {
+            msg = '사용 가능한 이메일입니다.';
+            flag = true;
+        }
 
-                setUserValue({...userValue, email: email });
-                setMassage({...massage, email: msg });
-
-                setCorrect({...correct, email: flag });
-            });
+        setUserValue({...userValue, email: email });
+        setMassage({...massage, email: msg });
+        setCorrect({...correct, email: flag });
 
     }
 
     // 이메일 입력값을 검증하고 관리할 함수
     const emailHandler = e => {
-
 
         const inputVal = e.target.value;
 
@@ -117,7 +127,7 @@ const Join = () => {
             return;
         }
 
-        setUserValue({
+        /*setUserValue({
             ...userValue,
             email: inputVal
         });
@@ -130,7 +140,10 @@ const Join = () => {
         setMassage({
             ...massage,
             email: msg
-        })
+        })*/
+
+        saveInputState(flag, msg, inputVal, 'email')
+
     }
 
     // 패스워드 입력값을 검증하고 관리할 함수
@@ -164,7 +177,7 @@ const Join = () => {
             flag = true;
         }
 
-        setUserValue({
+        /*setUserValue({
             ...userValue,
             password: inputVal
         });
@@ -177,7 +190,10 @@ const Join = () => {
         setMassage({
             ...massage,
             password: msg
-        })
+        })*/
+
+        saveInputState(flag, msg, inputVal, 'password')
+
 
     }
 
@@ -198,7 +214,7 @@ const Join = () => {
             flag = true;
         }
 
-        setCorrect({
+        /*setCorrect({
             ...correct,
             passwordCheck: flag
         })
@@ -206,16 +222,68 @@ const Join = () => {
         setMassage({
             ...massage,
             passwordCheck: msg
-        })
+        })*/
+
+        saveInputState(flag, msg, inputValue, 'passwordCheck')
 
     }
 
+    // 4개 입력칸이 모두 검증에 통과했는지 여부를 검사
+    const inputIsValid = () => {
+
+        for (const key in correct) {
+            const value = correct[key];
+            if(!value) return false;
+        }
+        return true;
+    }
+
+    // 회원가입 비동기요청을 서버로 보내는 함수
+    const fetchSignUpPost = async () => {
+
+        const res = await fetch(API_BASE_URL,{
+            method: 'POST',
+            headers: {'content-type':'application/json'},
+            body: JSON.stringify(userValue)
+        });
+
+        if(res.status === 200){
+            const json = await res.json();
+            console.log(json);
+
+            // 로그인 페이지로 리다이렉션
+            redirection('/login')
+
+        } else {
+            alert('서버와의 통신이 원활하지 않습니다');
+        }
+
+    }
+
+    // useEffect 상태값이 바뀔 때마다 뭔가를 실행함
     // 계정 생성 버튼을 누르면 동작할 내용
     const JoinClickHandler = e => {
         e.preventDefault();
         // console.log("click! joinHandler");
         // console.log(userValue);
+
+        if(!lock) { // 검증 통과
+            fetchSignUpPost()
+        } else { // 검증 실패
+            alert('입력란을 다시 확인해주세요');
+        }
     }
+
+    const {userName: un, password: pw, passwordCheck: pwc, email: em} = correct;
+    useEffect(() => {
+        /*console.log('correct가 바뀌면 useEffect는 실행된다.');
+        console.log(inputIsValid())*/
+        if (inputIsValid()){
+            setLock(false)
+        } else {
+            setLock(true)
+        }
+    }, [un, pw, pwc, em]);
 
     return (
         <Container component="main" maxWidth="xs" style={{ margin: "200px auto" }}>
@@ -305,9 +373,13 @@ const Join = () => {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            style={{background: '#38d9a9'}}
+                            style={
+                                lock
+                                ? {background: '#ccc'}
+                                : {background: '#38d9a9'}
+                                }
                             onClick={JoinClickHandler}
-                            disabled
+                            disabled={lock}
                         >
                             계정 생성
                         </Button>
