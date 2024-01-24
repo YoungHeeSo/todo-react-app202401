@@ -3,19 +3,20 @@ import {Button, Container, Grid, Link, TextField, Typography} from "@mui/materia
 
 import {AUTH_URL} from "../../config/host-config";
 import {useNavigate} from "react-router-dom";
+import {TOKEN, USERNAME} from "../../util/login-util";
 
 const Login = () => {
 
-    const redirection = Navigator =  useNavigate();
+    const redirection =  useNavigate();
 
     // 서버에 로그인 인증 요청 보내기
     const fetchLoginProcess = async () => {
         const res = await fetch(AUTH_URL + '/signin', {
             method:'POST',
             headers:{'content-type':'application/json'},
-            body:JSON.stringify({
-                email:document.getElementById('email').value,
-                password:document.getElementById('password').value
+            body: JSON.stringify({
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
             })
         });
 
@@ -28,8 +29,16 @@ const Login = () => {
         }
 
         if(res.status===200){
-            const responseDate = await res.json();
-            console.log(responseDate);
+            const {token, userName} = await res.json();
+            console.log(token, userName);
+
+            // 클라이언트에서 로그인을 했다는 사실을 알게 해야 함.
+            // 서버에서 받은 토큰을 브라우저에 저장할 것임.
+            // 로컬 스토리지 - 데이터를 브라우저가 종료되어도 계속 보관함
+            // 세션 스토리지 - 데이터를 브라우저가 종료되는 순간 삭제함
+            // sessionStorage.setItem()
+            localStorage.setItem(TOKEN, token)
+            localStorage.setItem(USERNAME, userName)
 
             redirection('/');
         }
@@ -53,7 +62,6 @@ const Login = () => {
             </Grid>
 
             <form noValidate onSubmit={loginHandler}>
-
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <TextField
@@ -81,7 +89,7 @@ const Login = () => {
                     </Grid>
                     <Grid item xs={12}>
                         <Button
-                            // type="submit"
+                            type="submit"
                             fullWidth
                             variant="contained"
                             style={{background: '#38d9a9'}}
