@@ -10,6 +10,9 @@ import Join from "./component/user/Join";
 import {Route, Routes} from "react-router-dom";
 import Login from "./component/user/Login";
 
+// 부트스트랩 로딩
+// import 'bootstrap/dist/css/bootstrap.min.css';
+
 function App() {
   return (
       <>
