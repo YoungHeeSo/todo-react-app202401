@@ -3,7 +3,7 @@ import {Button, Container, Grid, Link, TextField, Typography} from "@mui/materia
 
 import {AUTH_URL} from "../../config/host-config";
 import {useNavigate} from "react-router-dom";
-import {TOKEN, USERNAME} from "../../util/login-util";
+import {ROLE, TOKEN, USERNAME} from "../../util/login-util";
 
 const Login = () => {
 
@@ -29,7 +29,7 @@ const Login = () => {
         }
 
         if(res.status===200){
-            const {token, userName} = await res.json();
+            const {token, userName, role} = await res.json();
             console.log(token, userName);
 
             // 클라이언트에서 로그인을 했다는 사실을 알게 해야 함.
@@ -39,6 +39,7 @@ const Login = () => {
             // sessionStorage.setItem()
             localStorage.setItem(TOKEN, token)
             localStorage.setItem(USERNAME, userName)
+            localStorage.setItem(ROLE, role)
 
             redirection('/');
         }
