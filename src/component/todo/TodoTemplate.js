@@ -16,7 +16,7 @@ const TodoTemplate = () => {
     // 로딩 완료 상태값 관리
     const [loading, setLoading] = useState(true);
 
-    const rediection = useNavigate();
+    const redirection = useNavigate();
 
     // 토큰 가져오기
     const [token, setToken] = useState(getCurrentLoginUser().token);
@@ -127,7 +127,9 @@ const TodoTemplate = () => {
     // 체크가 안된 할일 개수 카운트하기
     const countRestTodo = todoList.filter(todo => !todo.done).length;
 
+    // 등급을 올리는 서버 비동기 통신 함수
     const fetchPromote = async () => {
+
         const res = await fetch(AUTH_URL + '/promote', {
             method: 'PUT',
             headers: requestHeader
@@ -147,7 +149,6 @@ const TodoTemplate = () => {
     // 등급을 상승시키는 함수
     const promote = () => {
         // console.log('등급 올려줘?');
-
         fetchPromote();
     }
 
@@ -163,7 +164,7 @@ const TodoTemplate = () => {
                 if(res.status === 200) return res.json();
                 else if(res.status === 403) {
                     alert('로그인이 필요한 서비스 입니다!');
-                    rediection('/login');
+                    redirection('/login');
                     return;
                 } else {
                     alert('서버가 불안정 합니다');

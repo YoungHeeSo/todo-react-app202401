@@ -15,7 +15,9 @@ const TodoHeader = ({count, onPromote}) => {
     const dayName = today.toLocaleDateString('ko-KR', { weekday: 'long' });
 
     const upgradeHandler = e => {
-        if(window.confirm('프리미엄 회원으로 업그레이드 하시겠어요?')) onPromote();
+        if(window.confirm('프리미엄 회원으로 업그레이드 하시겠어요?')) {
+            onPromote();
+        }
     }
 
     // 등급 뱃지를 조건부 렌더리하는 함수
@@ -27,7 +29,7 @@ const TodoHeader = ({count, onPromote}) => {
                 return (<span className={'promote badge bg-warning'} onClick={upgradeHandler}>일반회원</span>);
                 break;
             case 'PREMIUM':
-                return (<span className={'promote badge bg-warning'} onClick={upgradeHandler}>프리미엄회원</span>);
+                return (<span className={'promote badge bg-warning'}>프리미엄회원</span>);
                 break;
             case 'ADMIN':
                 return (<span className={'promote badge bg-warning'}>관리자</span>);

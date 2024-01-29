@@ -5,12 +5,19 @@ import {Button, Container, Grid,
 import {AUTH_URL} from "../../config/host-config";
 import {json, useNavigate} from "react-router-dom";
 
+import anonymous from "../../assets/img/anonymous.jpg";
+
+import "../todo/scss/Join.scss";
+
 const Join = () => {
 
     const redirection = useNavigate(); // 리다이렉트 함수를 리턴
 
     // 서버에서 할 일 목록 (JSON)을 요청해서 받아와야 함
     const API_BASE_URL = AUTH_URL;
+
+    // 프로필 이미지 파일을 상태변수로 관리
+    const [imgFile, setImgFile] = useState(null);
 
     // 상태변수로 회원가입 입력값 관리
     const [userValue, setUserValue] = useState({
@@ -238,13 +245,24 @@ const Join = () => {
         return true;
     }
 
+
     // 회원가입 비동기요청을 서버로 보내는 함수
     const fetchSignUpPost = async () => {
 
+        // json 데이터를 formData에 넣기 위한 작업
+        const jsonBlob = new Blob(
+            [ JSON.stringify(userValue) ],
+            { type : 'application/json' }
+        );
+
+        // 회원정보 json과 프로필 이미지 사진을 하나의 multipart/form-data로 묶어줘여 함
+        const formData = new FormData()
+        formData.append('user', jsonBlob);
+        formData.append('profileImage', document.getElementById('profile-img').files[0])
+
         const res = await fetch(API_BASE_URL,{
-            method: 'POST',
-            headers: {'content-type':'application/json'},
-            body: JSON.stringify(userValue)
+            method: 'POST'
+            , body: formData
         });
 
         if(res.status === 200){
@@ -264,6 +282,7 @@ const Join = () => {
     // 계정 생성 버튼을 누르면 동작할 내용
     const JoinClickHandler = e => {
         e.preventDefault();
+
         // console.log("click! joinHandler");
         // console.log(userValue);
 
@@ -285,6 +304,26 @@ const Join = () => {
         }
     }, [un, pw, pwc, em]);
 
+    // 썸네일 영역 클릭 이벤트
+    const thumbnailClickHandler = e => {
+        document.getElementById('profile-img').click();
+    }
+
+    // 파일 선택시 썸네일 화면에 렌더링
+    const showThumbnailHandler = e => {
+        // 첨부된 파일의 데이터 가져오기
+        const file = document.getElementById('profile-img').files[0];
+        console.log(file);
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = () => {
+            setImgFile(reader.result);
+        };
+
+    }
+
     return (
         <Container component="main" maxWidth="xs" style={{ margin: "200px auto" }}>
             <form noValidate>
@@ -293,6 +332,23 @@ const Join = () => {
                         <Typography component="h1" variant="h5">
                             계정 생성
                         </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <div className="thumbnail-box" onClick={thumbnailClickHandler}>
+                            <img
+                                // src={require('../../assets/img/anonymous.jpg')}
+                                src={imgFile || anonymous}
+                                alt="profile"
+                            />
+                        </div>
+                        <label className='signup-img-label' htmlFor='profile-img'>프로필 이미지 추가</label>
+                        <input
+                            id='profile-img'
+                            type='file'
+                            style={{display: 'none'}}
+                            accept='image/*'
+                            onChange={showThumbnailHandler}
+                        />
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
