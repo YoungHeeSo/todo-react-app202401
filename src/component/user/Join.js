@@ -5,7 +5,7 @@ import {Button, Container, Grid,
 import {AUTH_URL} from "../../config/host-config";
 import {json, useNavigate} from "react-router-dom";
 
-import anonymous from "../../assets/img/anonymous.jpg";
+import anonymous from "../../assets/img/image-add.png";
 
 import "../todo/scss/Join.scss";
 
