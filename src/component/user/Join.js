@@ -268,6 +268,7 @@ const Join = () => {
         if(res.status === 200){
             const json = await res.json();
             console.log(json);
+            console.log(document.getElementById('profile-img').files[0])
 
             // 로그인 페이지로 리다이렉션
             redirection('/login')
@@ -294,9 +295,9 @@ const Join = () => {
     }
 
     const {userName: un, password: pw, passwordCheck: pwc, email: em} = correct;
+
     useEffect(() => {
-        /*console.log('correct가 바뀌면 useEffect는 실행된다.');
-        console.log(inputIsValid())*/
+        fetchSideMenuImage();
         if (inputIsValid()){
             setLock(false)
         } else {
@@ -324,6 +325,32 @@ const Join = () => {
 
     }
 
+    // 이미지 경로
+    const [imagePath, setImagePath] = useState('');
+
+    // 이미지 가져오기
+    const fetchSideMenuImage = async ()=> {
+
+        const res = await fetch("http://localhost:8484/api/side/side-menu", {
+            method: 'GET'
+        });
+
+        if(res.status===200){
+            const profileData = await res.blob(); // json, text 이외의 이미지, 비디오, pdf같은 것은 blob으로 받아
+
+            // blob 이미지를 url으로 변환해야 img src에 경로로 넣을 수 있음
+            const imgUrl = window.URL.createObjectURL(profileData);
+            setImagePath(imgUrl);
+
+            console.log(imagePath);
+        } else {
+            const errMsg = await res.text();
+            alert(errMsg);
+            setImagePath(null);
+        }
+
+    }
+
     return (
         <Container component="main" maxWidth="xs" style={{ margin: "200px auto" }}>
             <form noValidate>
@@ -337,7 +364,8 @@ const Join = () => {
                         <div className="thumbnail-box" onClick={thumbnailClickHandler}>
                             <img
                                 // src={require('../../assets/img/anonymous.jpg')}
-                                src={imgFile || anonymous}
+                                // src={imgFile || anonymous}
+                                src={imgFile || imagePath}
                                 alt="profile"
                             />
                         </div>
